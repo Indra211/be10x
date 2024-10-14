@@ -1,4 +1,5 @@
-import React from "react";
+import React from 'react';
+import { MdEdit, MdDelete } from 'react-icons/md';
 
 interface Employee {
   _id?: string;
@@ -17,10 +18,10 @@ interface TableProps {
 
 const Table: React.FC<TableProps> = ({ data, onDelete, onUpdate }) => {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto border-collapse border border-gray-300">
+    <div className='overflow-x-auto'>
+      <table className='min-w-full table-auto border-collapse border border-gray-300'>
         <thead>
-          <tr className="bg-gray-200">
+          <tr className='bg-gray-200'>
             <th>S.No</th>
             <th>Name</th>
             <th>Age</th>
@@ -32,7 +33,10 @@ const Table: React.FC<TableProps> = ({ data, onDelete, onUpdate }) => {
         </thead>
         <tbody>
           {data.map((person, index) => (
-            <tr key={person._id} className="text-center">
+            <tr
+              key={person._id}
+              className='text-center'
+            >
               <td>{index + 1}</td>
               <td>{person.name}</td>
               <td>{person.age}</td>
@@ -41,16 +45,16 @@ const Table: React.FC<TableProps> = ({ data, onDelete, onUpdate }) => {
               <td>{person.address}</td>
               <td>
                 <button
-                  className="bg-blue-500 text-white px-4 py-1 rounded mr-2"
+                  className='bg-blue-500 text-white px-4 py-1 rounded mr-2'
                   onClick={() => onUpdate(person?._id)}
                 >
-                  Update
+                  <MdEdit />
                 </button>
                 <button
-                  className="bg-red-500 text-white px-4 py-1 rounded"
+                  className='bg-red-500 text-white px-4 py-1 rounded'
                   onClick={() => onDelete(person?._id)}
                 >
-                  Delete
+                  <MdDelete />
                 </button>
               </td>
             </tr>
