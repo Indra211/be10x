@@ -108,7 +108,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
     await connectToDatabase();
-    Emp.findOneAndDelete({ _id: id });
+    await Emp.deleteOne({ _id: id });
 
     return NextResponse.json({ status: "success" }, { status: 200 });
   } catch (error) {

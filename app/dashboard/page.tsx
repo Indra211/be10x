@@ -28,8 +28,26 @@ function Dashbaord() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
+  const openModal = () => {
+    setShowModal(true);
+    setFormData({
+      email: "",
+      name: "",
+      age: null,
+      blood_group: "",
+      address: "",
+    });
+  };
+  const closeModal = () => {
+    setShowModal(false);
+    setFormData({
+      email: "",
+      name: "",
+      age: null,
+      blood_group: "",
+      address: "",
+    });
+  };
   const handleFormData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -76,6 +94,7 @@ function Dashbaord() {
           blood_group: "",
           address: "",
         });
+        closeModal();
       }
     } else if (formData?._id) {
       try {
@@ -100,6 +119,7 @@ function Dashbaord() {
           blood_group: "",
           _id: "",
         });
+        closeModal();
       }
     }
   };
@@ -127,7 +147,17 @@ function Dashbaord() {
     setFormData({ ...data });
   };
 
-  const handleDelete = async (id: string) => {
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const openDeleteModalHandler = (id: any) => {
+    const data = empData?.filter((item: any) => item?._id === id)?.[0];
+    setFormData({ ...data });
+    setOpenDeleteModal(true);
+  };
+  const closeDeleteModalHandler = () => {
+    setOpenDeleteModal(false);
+  };
+
+  const handleDelete = async (id?: string) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/EmpData?id=${id}`, {
@@ -136,13 +166,21 @@ function Dashbaord() {
       const data = await res.json();
       if (data?.status === "success") {
         setEmpData(empData?.filter((item: any) => item?._id !== formData?._id));
-        closeModal();
       } else {
         alert("Something went wrong");
       }
     } catch (error) {
     } finally {
       setLoading(false);
+      setFormData({
+        email: "",
+        name: "",
+        age: null,
+        address: "",
+        blood_group: "",
+        _id: "",
+      });
+      closeDeleteModalHandler();
     }
   };
 
@@ -162,12 +200,14 @@ function Dashbaord() {
           Sign out
         </button>
       </header>
-      <button
-        className="fixed bottom-2 right-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
-        onClick={openModal}
-      >
-        Create Employee
-      </button>
+      {empData?.length > 0 && (
+        <button
+          className="fixed bottom-2 right-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+          onClick={openModal}
+        >
+          Create Employee
+        </button>
+      )}
       <main>
         {showModal && (
           <Modal showModal={showModal} closeModal={closeModal}>
@@ -224,6 +264,32 @@ function Dashbaord() {
             </form>
           </Modal>
         )}
+        {openDeleteModal && (
+          <Modal
+            showModal={openDeleteModal}
+            closeModal={closeDeleteModalHandler}
+          >
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              <h1 className="text-xl font-medium mb-6">
+                Are you sure you want to delete?
+              </h1>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => handleDelete(formData?._id)}
+                  className="bg-red-500  text-white px-4 py-2 rounded-md"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={closeDeleteModalHandler}
+                  className="bg-white-500 border border-red-500 text-red-500 px-4 py-2 rounded-md"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
         <div className="w-full h-full flex flex-col items-center justify-center">
           <h1 className="text-xl font-medium">Employee Details</h1>
           <div
@@ -236,13 +302,21 @@ function Dashbaord() {
             {empData?.length > 0 ? (
               <Table
                 data={empData}
-                onDelete={(id: any) => handleUpdateData(id)}
                 onUpdate={(id: any) => handleUpdateData(id)}
+                onDelete={(id: any) => openDeleteModalHandler(id)}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <p>No data found</p>
-              </div>
+              <>
+                <div className=" mt-4 w-full h-full flex flex-col gap-4 items-center justify-center">
+                  <p>No data found</p>
+                  <button
+                    className=" px-4 py-2 bg-blue-500 text-white rounded-lg"
+                    onClick={openModal}
+                  >
+                    Create Employee
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

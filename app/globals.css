@@ -11,3 +11,7 @@
 input {
   @apply w-full p-2 border border-slate-300 bg-zinc-100 rounded mb-4;
 }
+th,
+td {
+  @apply border border-gray-300 px-4 py-2;
+}
