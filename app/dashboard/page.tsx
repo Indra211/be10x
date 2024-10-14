@@ -1,6 +1,6 @@
 'use client';
 import { signOut, useSession } from 'next-auth/react';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Modal from '../components/Modal';
 import Table from '../components/Table';
 import { MdOutlineAdd } from 'react-icons/md';
@@ -15,8 +15,25 @@ type EmpData = {
   address: string;
 };
 
+import { DefaultSession, Session } from 'next-auth';
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      fullName: string;
+    } & DefaultSession['user'];
+  }
+
+  interface User {
+    fullName: string;
+  }
+}
+
 function Dashbaord() {
-  const session: any = useSession();
+  const { data: session } = useSession();
+
+  const user = session?.user as Session['user'];
+  const { fullName } = user || {};
 
   const [formData, setFormData] = useState<EmpData>({
     email: '',
@@ -58,7 +75,6 @@ function Dashbaord() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData._id);
 
     if (loading) return;
 
@@ -85,6 +101,10 @@ function Dashbaord() {
           },
           body: JSON.stringify(formData),
         });
+        const data = await res.json();
+        if (data?.status === 'success') {
+          setEmpData([...empData, data?.data]);
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -108,7 +128,13 @@ function Dashbaord() {
           body: JSON.stringify(formData),
         });
         const data = await res.json();
-        console.log(data);
+        if (data?.status === 'success') {
+          setEmpData(
+            empData?.map((item?: EmpData) =>
+              item?._id === formData?._id ? data?.data : item
+            )
+          );
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -139,19 +165,19 @@ function Dashbaord() {
       }
     };
     fetchData();
-  }, [formData]);
+  }, []);
 
   const [empData, setEmpData] = useState<EmpData[]>([]);
 
-  const handleUpdateData = (id: string) => {
-    const data = empData?.filter((item: any) => item?._id === id)?.[0];
+  const handleUpdateData = (id?: string) => {
+    const data = empData?.filter((item?: EmpData) => item?._id === id)?.[0];
     openModal();
     setFormData({ ...data });
   };
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const openDeleteModalHandler = (id: any) => {
-    const data = empData?.filter((item: any) => item?._id === id)?.[0];
+  const openDeleteModalHandler = (id?: string) => {
+    const data = empData?.filter((item?: EmpData) => item?._id === id)?.[0];
     setFormData({ ...data });
     setOpenDeleteModal(true);
   };
@@ -167,11 +193,14 @@ function Dashbaord() {
       });
       const data = await res.json();
       if (data?.status === 'success') {
-        setEmpData(empData?.filter((item: any) => item?._id !== formData?._id));
+        setEmpData(
+          empData?.filter((item?: EmpData) => item?._id !== formData?._id)
+        );
       } else {
         alert('Something went wrong');
       }
     } catch (error) {
+      console.log(error);
     } finally {
       setLoading(false);
       setFormData({
@@ -187,13 +216,11 @@ function Dashbaord() {
   };
 
   return (
-    <div className='w-full h-full bg-slate-200 relative'>
-      <header className='shadow-md shadow-slate-100 p-2 bg-white w-full flex items-center justify-between'>
+    <div className='w-full h-full bg-slate-200 relative flex flex-col'>
+      <header className='flex-[0.01] shadow-md shadow-slate-100 p-2 bg-white w-full flex items-center justify-between'>
         <p>
           <span className='font-medium text-slate-500'>Welcome</span>{' '}
-          <span className='font-bold text-slate-500'>
-            {session?.data?.user?.fullName}
-          </span>
+          <span className='font-bold text-slate-500'>{fullName}</span>
         </p>
         <button
           onClick={() => signOut()}
@@ -210,7 +237,7 @@ function Dashbaord() {
           <MdOutlineAdd /> Create Employee
         </button>
       )}
-      <main>
+      <main className='flex-[0.98]'>
         {showModal && (
           <Modal
             showModal={showModal}
@@ -307,14 +334,14 @@ function Dashbaord() {
             {empData?.length > 0 ? (
               <Table
                 data={empData}
-                onUpdate={(id: any) => handleUpdateData(id)}
-                onDelete={(id: any) => openDeleteModalHandler(id)}
+                onUpdate={(id?: string) => handleUpdateData(id)}
+                onDelete={(id?: string) => openDeleteModalHandler(id)}
               />
             ) : (
               <div className=' mt-4 w-full h-full flex flex-col gap-4 items-center justify-center'>
                 <p>No data found</p>
                 <button
-                  className='fixed bottom-2 right-2 px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center justify-center'
+                  className=' px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center justify-center'
                   onClick={openModal}
                 >
                   <MdOutlineAdd /> Create Employee
@@ -324,7 +351,7 @@ function Dashbaord() {
           </div>
         </div>
       </main>
-      <div className='fixed bottom-0 w-full'>
+      <div className='flex-[0.01]'>
         <Footer />
       </div>
     </div>

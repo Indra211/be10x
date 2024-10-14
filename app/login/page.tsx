@@ -93,7 +93,8 @@ const Login = () => {
           href='/register'
           className='self-center'
         >
-          Don't have an account? <span className='text-blue-500'>Register</span>
+          Don&apos;t have an account?{' '}
+          <span className='text-blue-500'>Register</span>
         </Link>
       </form>
       <div className='fixed bottom-0 w-full'>

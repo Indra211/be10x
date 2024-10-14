@@ -1,14 +1,20 @@
+import { AuthOptions } from '@/app/utils/AuthOptions';
 import { connectToDatabase } from '@/lib/mongodb';
 import Emp from '@/models/empData';
 import { getServerSession } from 'next-auth';
 
 import { NextResponse } from 'next/server';
-import { authOptions } from '../auth/[...nextauth]/route';
-import mongoose from 'mongoose';
+
+interface Ids {
+  id: string;
+}
+interface Employee {
+  user?: Ids;
+}
 
 export async function POST(request: Request) {
   try {
-    const session: any = await getServerSession(authOptions);
+    const session: Employee | null = await getServerSession(AuthOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -24,6 +30,8 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ data, status: 'success' }, { status: 201 });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { message: 'Internal Server Error' },
       { status: 500 }
@@ -31,18 +39,19 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const session: any = await getServerSession(authOptions);
+    const session: Employee | null = await getServerSession(AuthOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     await connectToDatabase();
-    console.log(session?.user?.id);
 
     const data = await Emp.find({ user: session?.user?.id });
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { message: 'Internal Server Error' },
       { status: 500 }
@@ -52,12 +61,11 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const session: any = await getServerSession(authOptions);
+    const session: Employee | null = await getServerSession(AuthOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const id = request.url?.split('=')?.pop();
-    console.log(id);
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -91,6 +99,8 @@ export async function PATCH(request: Request) {
       { status: 200 }
     );
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { message: 'Internal Server Error' },
       { status: 500 }
@@ -100,7 +110,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const session: any = await getServerSession(authOptions);
+    const session = await getServerSession(AuthOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -114,6 +124,8 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ status: 'success' }, { status: 200 });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { message: 'Internal Server Error' },
       { status: 500 }

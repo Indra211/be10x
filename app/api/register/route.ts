@@ -1,7 +1,7 @@
-import { connectToDatabase } from "@/lib/mongodb";
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import user from "@/models/user";
+import { connectToDatabase } from '@/lib/mongodb';
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import user from '@/models/user';
 
 export async function POST(request: Request) {
   try {
@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     if (chkEmail) {
       return NextResponse.json(
         {
-          message: "Email already exists",
-          status: "error",
+          message: 'Email already exists',
+          status: 'error',
         },
         { status: 400 }
       );
@@ -27,18 +27,20 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         id: data?._id,
-        message: "User created successfully",
-        status: "success",
+        message: 'User created successfully',
+        status: 'success',
       },
       {
         status: 201,
       }
     );
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       {
-        message: "Internal Server Error",
-        status: "error",
+        message: 'Internal Server Error',
+        status: 'error',
       },
       { status: 500 }
     );
